@@ -1,11 +1,12 @@
 import React, {Component} from 'react';
 import {observer} from 'mobx-react';
 import __state from '../tools/state.js';
-import { Layout, Menu, Breadcrumb, Icon,Divider } from 'antd';
+import {Layout, Menu, Breadcrumb, Icon,Divider} from 'antd';
 import Article from '../components/Article.jsx'
 import Detail from '../components/Detail.jsx'
-import {Route, Link} from 'react-router-dom';
+import {Route, Link, Switch} from 'react-router-dom';
 const {Header, Content, Footer, Sider} = Layout;
+
 @observer
 class defaultExport extends Component {
     constructor(props) {
@@ -85,8 +86,10 @@ class defaultExport extends Component {
                     <Breadcrumb.Item>Bill</Breadcrumb.Item>
                     </Breadcrumb>
                     <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
-                        <Route path="/home/article" component={Article}/>
-                        <Route path="/home/detail" component={Detail}/>
+                        <Switch>
+                            <Route exact path="/home/article" component={Article}/>
+                            <Route path="/home/article/1" component={Detail}/>
+                        </Switch>
                     </div>
                 </Content>
                 <Footer style={{ textAlign: 'center' }}>

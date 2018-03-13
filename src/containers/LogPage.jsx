@@ -49,7 +49,7 @@ class logForm extends Component {
                     if (response.status === 0) {
                         // 跳转至主页
                         __state.SetState('globalState',response.data);
-                        location.replace("#/home");
+                        location.replace("#/home/article");
                     } else {
                         this.props.form.setFields({'logPass': {
                             errors: [new Error('密码错误或用户不存在')]
@@ -242,9 +242,9 @@ class defaultExport extends Component {
     }
     render() {
         return (
-            <div style={{background: `url(${backgroundImg})`, height: '100%'}}>
+            <div style={{background: `url(${backgroundImg})`, height: '100%', backgroundSize: 'contain'}}>
                 <Row align="middle" type="flex" style={{height: '100%'}}>
-                    <Col span={11} offset={12}>
+                    <Col span={5} offset={14}>
                         <div style={{boxShadow:'0 2px 8px #f0f1f2', background:'white', padding: '10px', borderRadius: '10px', minWidth: '450px'}}>
                         <h1>群博系统</h1>
                         <Tabs activeKey={this.state.indexKey} onTabClick={this.onTabClick}>
