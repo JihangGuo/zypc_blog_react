@@ -16,6 +16,7 @@
         "moment": "^2.20.1",
         "react": "^16.2.0",
         "react-dom": "^16.2.0",
+        "react-quill": "^1.2.6",
         "react-router-dom": "^4.2.2"
     },
     "devDependencies": {

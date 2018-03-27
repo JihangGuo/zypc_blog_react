@@ -2,9 +2,15 @@ import React, {Component} from 'react';
 import {observer} from 'mobx-react';
 import __state from '../tools/state.js';
 import {Layout, Menu, Breadcrumb, Icon,Divider} from 'antd';
-import Article from '../components/Article.jsx'
-import Detail from '../components/Detail.jsx'
-import {Route, Link, Switch} from 'react-router-dom';
+import Article from '../containers/Article.jsx';
+import Detail from '../components/Detail.jsx';
+import Tags from '../containers/Tags.jsx';
+import Setting from '../containers/Setting.jsx';
+import Write from '../containers/Write.jsx';
+import Draft from '../components/List.jsx';
+import ContentCard from '../components/ListAlign.jsx';
+import {Route, Switch,Link, HashRouter as Router,} from 'react-router-dom';
+
 const {Header, Content, Footer, Sider} = Layout;
 
 @observer
@@ -42,23 +48,23 @@ class defaultExport extends Component {
                     <p style={{textAlign: 'center', fontSize: 16}}>{__state.globalState.userName}</p>
                     <span>
                             
-                            <a href="#"><Icon type="edit" />写博客</a>
+                            <Link to="/home/write"><Icon type="edit" />写博客</Link>
                             <Divider type="vertical" />
                             
-                            <a href="#"><Icon type="star" />收藏</a>
+                            <Link to="/home/collection/star"><Icon type="star" />收藏</Link>
                             <Divider type="vertical" />
                             
-                            <a href="#"><Icon type="delete" />垃圾桶</a>
+                            <Link to="/home/collection/draft"><Icon type="delete" />草稿箱</Link>
                     </span>
                     <Menu defaultSelectedKeys={['1']} mode="inline" style={{paddingLeft:2, marginTop: 6}}>
                         <Menu.Item key="1">
                         <Link to="/home/article"><Icon type="file" />全部文章</Link>
                         </Menu.Item>
                         <Menu.Item key="2">
-                        <Link to="/home"><Icon type="tag-o" />标签管理</Link>
+                        <Link to="/home/tags"><Icon type="tag-o" />标签管理</Link>
                         </Menu.Item>
                         <Menu.Item key="9">
-                        <Link to="/home"><Icon type="setting" />个人设置</Link>
+                        <Link to="/home/setting"><Icon type="setting" />个人设置</Link>
                         </Menu.Item>
                     </Menu>
                     <div style={{height: 10, background: '#f0f2f5'}} />
@@ -82,14 +88,20 @@ class defaultExport extends Component {
                 <Layout>
                 <Content style={{ margin: '0 16px' }}>
                     <Breadcrumb style={{ margin: '16px 0' }}>
-                    <Breadcrumb.Item>User</Breadcrumb.Item>
-                    <Breadcrumb.Item>Bill</Breadcrumb.Item>
+                        <Breadcrumb.Item>User</Breadcrumb.Item>
+                        <Breadcrumb.Item>Bill</Breadcrumb.Item>
                     </Breadcrumb>
                     <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
-                        <Switch>
-                            <Route exact path="/home/article" component={Article}/>
-                            <Route path="/home/article/1" component={Detail}/>
-                        </Switch>
+                        <Router>
+                            <Switch>
+                                <Route path="/home/article/1" component={Detail}/>
+                                <Route path="/home/article" component={Article}/>
+                                <Route path="/home/tags" component={Tags}/>
+                                <Route path="/home/setting" component={Setting}/>
+                                <Route path="/home/write" component={Write}/>
+                                <Route path="/home/collection/:type" component={ContentCard}/>
+                            </Switch>
+                        </Router>
                     </div>
                 </Content>
                 <Footer style={{ textAlign: 'center' }}>

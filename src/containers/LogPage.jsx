@@ -195,7 +195,7 @@ class logForm extends Component {
                                 validator: this.checkPassword
                             }],
                         })(
-                            <Input prefix={<Icon type="filter" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="重复密码"  onBlur={this.handleConfirmBlur} />
+                            <Input prefix={<Icon type="filter" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="重复密码" onBlur={this.handleConfirmBlur} />
                         )}
                     </FormItem>
                     <FormItem style={{borderTop: '1px solid rgb(171, 171, 171)'}}>
@@ -242,7 +242,7 @@ class defaultExport extends Component {
     }
     render() {
         return (
-            <div style={{background: `url(${backgroundImg})`, height: '100%', backgroundSize: 'contain'}}>
+            <div style={{background: `url(${backgroundImg}) no-repeat`, height: '100%', backgroundSize: 'cover'}}>
                 <Row align="middle" type="flex" style={{height: '100%'}}>
                     <Col span={5} offset={14}>
                         <div style={{boxShadow:'0 2px 8px #f0f1f2', background:'white', padding: '10px', borderRadius: '10px', minWidth: '450px'}}>

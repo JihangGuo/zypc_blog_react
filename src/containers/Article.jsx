@@ -28,10 +28,16 @@ class defaultExport extends Component {
         console.log('From: ', dates[0], ', to: ', dates[1]);
         console.log('From: ', dateStrings[0], ', to: ', dateStrings[1]);
     }
-    switchSearch = () => {
-        this.setState({
-            checkSearch: !this.state.checkSearch
-        });
+    switchSearch = (type) => {
+        if (type === "seachByTitle" && !this.state.checkSearch) {
+            this.setState({
+                checkSearch: true
+            });
+        } else if (type === "seachByTime" && this.state.checkSearch) {
+            this.setState({
+                checkSearch: false
+            });
+        }
     }
     getDetail = () => {
         location.replace("/home/detail/111");
@@ -42,8 +48,8 @@ class defaultExport extends Component {
             <div>
                 <div style={{margin: '0 auto', width: 300, paddingBottom: 40}}>
                     <Breadcrumb style={{margin: 10}}>
-                        <Breadcrumb.Item><a onClick={this.switchSearch}>按标题搜索</a></Breadcrumb.Item>
-                        <Breadcrumb.Item><a onClick={this.switchSearch}>按时间搜索</a></Breadcrumb.Item>
+                        <Breadcrumb.Item><a onClick={() => this.switchSearch("seachByTitle")}>按标题搜索</a></Breadcrumb.Item>
+                        <Breadcrumb.Item><a onClick={() => this.switchSearch("seachByTime")}>按时间搜索</a></Breadcrumb.Item>
                     </Breadcrumb>
                     {this.state.checkSearch
                     ? <Search
