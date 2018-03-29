@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
-import { Tag, Input, Tooltip, Icon ,Modal,message} from 'antd';
+import { Tag, Input, Tooltip, Icon ,Modal,message,Row,Col,Card} from 'antd';
+import {Link,Router} from 'react-router-dom';
+import ajax from '../tools/ajax.js'
 const confirm = Modal.confirm;
 
 class defaultExport extends Component {
@@ -67,7 +69,11 @@ class defaultExport extends Component {
     }
     
     saveInputRef = input => this.input = input
-   
+    componentDidMount(){
+        // ajax('http://127.0.0.1:8000/api/get_alll','post','',(response) => {
+        //     console.log(response);
+        // })
+    }
     renderTags = (tags) => {
         return tags.map((tag, index) => {
             const isLongTag = tag.length > 20;
@@ -82,6 +88,7 @@ class defaultExport extends Component {
 
     render() {
         return (
+           
             <div>
                 {this.renderTags(this.state.tags)}
                 {this.state.inputVisible && (
@@ -104,7 +111,50 @@ class defaultExport extends Component {
                     <Icon type="plus" /> 增加新标签
                 </Tag>
                 )}
+                <Row gutter="8" type="flex" style={{marginTop: 20}}>
+                    <Col  xs={12} sm={8} md={6} >
+                        <Card
+                        title="title"
+                        extra={<Link to='/home/article/1'>More</Link>}
+                        loading={false}
+                        hoverable={true}
+                        >
+                            内容内容内容内容内容内容内容内容内容内容内容内容内容内容
+                        </Card>
+                    </Col>
+                    <Col  xs={12} sm={8} md={6} >
+                        <Card
+                        title="title"
+                        extra={<Link to='/home/article/1'>More</Link>}
+                        loading={false}
+                        hoverable={true}
+                        >
+                            内容内容内容内容内容内容内容内容内容内容内容内容内容内容
+                        </Card>
+                    </Col>
+                    <Col  xs={12} sm={8} md={6} >
+                        <Card
+                        title="title"
+                        extra={<Link to='/home/article/1'>More</Link>}
+                        loading={false}
+                        hoverable={true}
+                        >
+                            内容内容内容内容内容内容内容内容内容内容内容内容内容内容
+                        </Card>
+                    </Col>
+                    <Col  xs={12} sm={8} md={6} >
+                        <Card
+                        title="title"
+                        extra={<Link to='/home/article/1'>More</Link>}
+                        loading={false}
+                        hoverable={true}
+                        >
+                            内容内容内容内容内容内容内容内容内容内容内容内容内容内容
+                        </Card>
+                    </Col>
+                </Row>
             </div>
+            
         );
     }
 }

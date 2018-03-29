@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {observer} from 'mobx-react';
+import ajax from '../tools/ajax.js'
 import __state from '../tools/state.js';
 import {Layout, Menu, Breadcrumb, Icon,Divider} from 'antd';
 import Article from '../containers/Article.jsx';
@@ -27,23 +28,25 @@ class defaultExport extends Component {
         
         // 全局变量定义
     }
-
+    componentDidMount(){
+        ajax('http://127.0.0.1:8000/api/get_all','post','',(response) => {
+            __state.SetState('globalState',response.data);
+        })
+    }
     render() {
         return (
+            <Router>
             <Layout style={{ minHeight: '100vh' }}>
             <div style={{background: '#f0f2f5', padding:8, paddingTop: 20}}>
                 <Sider
                 style={{background: 'white'}}
                 >
                     <div className="logo" style={{
-                    background: 'black',
+                    background: `url(${__state.globalState.userPic})`,
                     margin: '10px auto',
                     width: 100,
                     height: 100,
-                    borderRadius: 100,
-                    backgroundSize:'100px 100px',
-                    backgroundRepeat:'no-repeat',
-                    backgroundPosition : 'center center'
+                    borderRadius: 100
                     }}/>
                     <p style={{textAlign: 'center', fontSize: 16}}>{__state.globalState.userName}</p>
                     <span>
@@ -92,7 +95,7 @@ class defaultExport extends Component {
                         <Breadcrumb.Item>Bill</Breadcrumb.Item>
                     </Breadcrumb>
                     <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
-                        <Router>
+                        
                             <Switch>
                                 <Route path="/home/article/1" component={Detail}/>
                                 <Route path="/home/article" component={Article}/>
@@ -101,7 +104,7 @@ class defaultExport extends Component {
                                 <Route path="/home/write" component={Write}/>
                                 <Route path="/home/collection/:type" component={ContentCard}/>
                             </Switch>
-                        </Router>
+                        
                     </div>
                 </Content>
                 <Footer style={{ textAlign: 'center' }}>
@@ -109,6 +112,7 @@ class defaultExport extends Component {
                 </Footer>
                 </Layout>
             </Layout>
+            </Router>
         );
     }
 }

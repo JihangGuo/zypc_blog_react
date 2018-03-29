@@ -41,31 +41,36 @@ class logForm extends Component {
 
     handleSubmit = (e,type) => {
         e.preventDefault();
-        this.props.form.validateFields((err, values) => {
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            console.log("错误是：",err);
             if (!err) {
                 if (this.props.formType === 'login') {
                     // 进行表单上传
-                    let response = ajax('/api/login','post', values);
-                    if (response.status === 0) {
-                        // 跳转至主页
-                        __state.SetState('globalState',response.data);
-                        location.replace("#/home/article");
-                    } else {
-                        this.props.form.setFields({'logPass': {
-                            errors: [new Error('密码错误或用户不存在')]
-                        }})
-                    }
+                    let response = ajax('http://127.0.0.1:8000/api/login','post', values, (response) => {
+                        if (response.status === 1) {
+                            // 跳转至主页
+                            location.replace("#/home/article");
+                        } else {
+                            this.props.form.setFields({'logPass': {
+                                errors: [new Error('密码错误或用户不存在')]
+                            }})
+                        }
+                    });
+                    
                 } else if (this.props.formType === 'signin') {
                     // 进行表单上传
-                    let response = ajax('/api/signin','post', values);
-                    if (response.status === 0) {
-                        message.success('注册成功！');
-                        // 进行跳转
-                        __state.SetState('logState',{'logName':values.signName,'isFirst': true});
-                        this.props.checkSign();
-                    }
-                }
-                
+                        ajax('http://127.0.0.1:8000/api/signin','post', values, (response) => {
+                            console.log("接收：",response);
+                            if (response.status === 1) {
+                                // 进行跳转
+                                __state.SetState('logState',{'logName':values.signName,'isFirst': true});
+                                this.props.checkSign();
+                                message.success('注册成功！');
+                            } else {
+                                message.error(response.msg);
+                            }
+                        });        
+                } 
             }
         });
     }
@@ -80,20 +85,43 @@ class logForm extends Component {
         this.setState({ result });
     }
 
-    checkName = () => {
-        clearTimeout(this.onFindTimer);
-        this.onFindTimer = setTimeout(() => {
-            let signName = this.props.form.getFieldValue('signName');
-            let response = ajax('/api/check_name','get', signName);
-            if (response.status !== 0) {
-                this.props.form.setFields({
-                    'signName': {
-                      value: signName,
-                      errors: [new Error('已经存在这个昵称啦')],
-                    },
-                  });
-            }
-        },400)
+    checkEmail = (rule, value, callback) => {
+        const form = this.props.form;
+        if (value) {
+            clearTimeout(this.onFindTimer);
+            this.onFindTimer = setTimeout(() => {
+                let signEmail = form.getFieldValue('signEmail');
+                ajax('http://127.0.0.1:8000/api/check_email','post', {check_email:signEmail}, (response) => {
+                    if (response.status !== 1) {
+                        callback(response.msg);
+                    }else {
+                        callback();
+                    }
+                });
+            },400);
+        }else if(callback){
+            callback();
+        } 
+    }
+
+    checkName = (rule, value, callback) => {
+        const form = this.props.form;
+        if (value) {
+            clearTimeout(this.onFindTimer);
+            this.onFindTimer = setTimeout(() => {
+                let signName = form.getFieldValue('signName');
+                ajax('http://127.0.0.1:8000/api/check_name','post', {check_name:signName}, (response) => {
+                    if (response.status !== 1) {
+                        callback(response.msg);
+                    } else {
+                        callback();
+                    }
+                });
+            },400);
+        }else if(callback){
+            callback();
+        }
+        
     }
 
     handleConfirmBlur = (e) => {
@@ -102,7 +130,6 @@ class logForm extends Component {
     }
 
     checkConfirm = (rule, value, callback) => {
-        console.log(value)
         const form = this.props.form;
         if (value && this.state.confirmDirty) {
           form.validateFields(['signRePass'], {force: true});
@@ -114,9 +141,8 @@ class logForm extends Component {
         const form = this.props.form;
         if (value && value !== form.getFieldValue('signPass')) {
             callback('与设置密码不符合');
-        } else {
-            callback();
         }
+        callback();
     }
 
     render(){
@@ -153,7 +179,7 @@ class logForm extends Component {
                 : <Form onSubmit={(e) => this.handleSubmit(e)} className="sign-form">
                     <FormItem>
                         {getFieldDecorator('signEmail', {
-                            rules: [{ required: true, message: '请输入有效的邮箱', type:'email' }],
+                            rules: [{ required: true, message: '请输入有效的邮箱', type:'email' },{validator: this.checkEmail}],
                         })(
                             <AutoComplete
                             prefix={<Icon type="layout" />}
@@ -166,21 +192,21 @@ class logForm extends Component {
                     </FormItem>
                     <FormItem>
                         {getFieldDecorator('signName', {
-                            rules: [{required: true, message: '请输入你的名字', type:'string', max:30, min:4}],
+                            rules: [{whitespace:true,required: true, message: '请输入你的名字', type:'string', max:30, min:6},{validator: this.checkName}],
                         })(
                             <Input onChange={this.checkName} prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="用户名" />
                         )}
                     </FormItem>
                     <FormItem>
                         {getFieldDecorator('signPhone', {
-                            rules: [{ required: true, message: '请输入你的号码', type: 'string', len: 11}],
+                            rules: [{ whitespace:true,required: true, message: '请输入你的号码', type: 'string', len: 11}],
                         })(
                             <Input prefix={<Icon type="phone" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="电话" />
                         )}
                     </FormItem>
                     <FormItem>
                         {getFieldDecorator('signPass', {
-                            rules: [{ required: true, message: '请设置密码', max:20, min:6},
+                            rules: [{ whitespace:true,required: true, message: '请设置密码', max:20, min:6},
                             {
                                 validator: this.checkConfirm
                             }],
@@ -190,7 +216,7 @@ class logForm extends Component {
                     </FormItem>
                     <FormItem>
                         {getFieldDecorator('signRePass', {
-                            rules: [{ required: true, message: '与原密码不一致', max:20, min:6},
+                            rules: [{ whitespace:true,required: true, message: '与原密码不一致', max:20, min:6},
                             {
                                 validator: this.checkPassword
                             }],

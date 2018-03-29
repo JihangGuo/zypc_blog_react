@@ -14,8 +14,9 @@ class Store {
     };
 
     @observable globalState = {
-        'userId': '',
         'userName': '未登录',
+        'userPhone': '',
+        'userEmail': '', 
         'blogName': '',
         'userPic': ''
     };

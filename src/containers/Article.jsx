@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
 import {observer} from 'mobx-react';
 import __state from '../tools/state.js';
+import ajax from '../tools/ajax.js'
 import moment from 'moment';
 import {Row, Col, Card, Icon, Avatar, Timeline, Breadcrumb, Input, DatePicker} from 'antd';
-import {Link} from 'react-router-dom';
+import {Link,Router} from 'react-router-dom';
 const { Meta } = Card;
 const RangePicker = DatePicker.RangePicker;
 const Search = Input.Search;
@@ -42,9 +43,15 @@ class defaultExport extends Component {
     getDetail = () => {
         location.replace("/home/detail/111");
     }
+    componentDidMount(){
+        // ajax('http://127.0.0.1:8000/api/get_all','post','',(response) => {
+        //     console.log(response);
 
+        // })
+    }
     render() {
         return (
+            
             <div>
                 <div style={{margin: '0 auto', width: 300, paddingBottom: 40}}>
                     <Breadcrumb style={{margin: 10}}>
@@ -117,6 +124,7 @@ class defaultExport extends Component {
                 </Timeline>
                 
             </div>
+            
         );
     }
 }

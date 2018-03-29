@@ -1,11 +1,15 @@
 import React, {Component} from 'react';
 import { Row, Col ,Form, Icon, Input, Button,Divider, AutoComplete,Steps, message, Modal,Upload} from 'antd';
 import backgroundImg from '../../static/background.png';
+import ajax from '../tools/ajax.js'
+import __state from '../tools/state.js';
+import {observer} from 'mobx-react';
 const Dragger = Upload.Dragger;
 const FormItem = Form.Item;
 const Option = AutoComplete.Option;
 const Step = Steps.Step;
 
+@observer
 class PasswordFormInit extends Component {
     constructor(props) {
         super(props);
@@ -39,15 +43,16 @@ class PasswordFormInit extends Component {
     }
 
     next() {
-        if (this.state.current === 0) {
+        if (this.state.current === 0 && this.checkPassword(this.state.originPass)) {
             // 进行原密码判断与进行密码规则校验
-            let checkPass = true;
-            if (this.checkPassword(this.state.originPass) && checkPass) {
-                const current = this.state.current + 1;
-                this.setState({ current });
-            } else {
-                message.error('输入原密码错误');
-            }   
+            ajax('http://127.0.0.1:8000/api/setting','post',{type:"change_pass",step:1,userPass: this.state.originPass},(response) => {
+                  if (response.status === 1) {
+                        const current = this.state.current + 1;
+                        this.setState({ current });
+                  } else {
+                        message.error('输入原密码错误');
+                  }
+            });
         } else if (this.state.current === 1 && this.checkPassword(this.state.newPass)) {
             const current = this.state.current + 1;
             this.setState({ current });
@@ -63,15 +68,21 @@ class PasswordFormInit extends Component {
         // 进行输入值比较与规则校验
         if (this.checkPassword(this.rePass) && this.state.rePass === this.state.newPass) {
             // 数据库更改
-
-            // 清除相关值 退出弹出框
-            message.success('修改成功');
-            this.setState({
-                originPass: '',
-                newPass: '',
-                rePass: ''
+            ajax('http://127.0.0.1:8000/api/setting','post',{type:"change_pass",step:2,userPass: this.state.rePass},(response) => {
+                  // 清除相关值 退出弹出框
+                  if (response.status === 1) {
+                        message.success('修改成功');
+                        this.setState({
+                            originPass: '',
+                            newPass: '',
+                            rePass: '',
+                            current: 0
+                        });
+                        this.props.closeModal();  
+                  } else {
+                        message.error('网络错误，修改失败');
+                  }
             });
-            this.props.closeModal();
         } else {
             message.error('与新密码不符');
         }
@@ -83,6 +94,7 @@ class PasswordFormInit extends Component {
             {
                 title: "请输入原密码",
                 content: <Input
+                            type="password"
                             prefix={<Icon type="key" style={{ color: 'rgba(0,0,0,.25)' }} />}
                             value={this.state.originPass}
                             onChange={(e) => this.onChange(e, "one")}  
@@ -91,6 +103,7 @@ class PasswordFormInit extends Component {
             {
                 title: "请输入新密码",
                 content: <Input
+                            type="password"
                             prefix={<Icon type="unlock" style={{ color: 'rgba(0,0,0,.25)' }} />}
                             value={this.state.newPass}
                             onChange={(e) => this.onChange(e, "two")}
@@ -99,6 +112,7 @@ class PasswordFormInit extends Component {
             {
                 title: "请再次输入新密码",
                 content: <Input
+                            type="password"
                             prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}   
                             value={this.state.rePass}
                             onChange={(e) => this.onChange(e, "three")}  
@@ -137,6 +151,7 @@ class PasswordFormInit extends Component {
 }
 const PasswordForm = Form.create()(PasswordFormInit);
 
+@observer
 class UserFormInit extends Component {
     constructor(props) {
         super(props);
@@ -150,14 +165,18 @@ class UserFormInit extends Component {
         this.onFindTimer;
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleSearch = this.handleSearch.bind(this);
-        this.checkName = this.checkName.bind(this);
+        
     }
 
     handleSubmit = (e) => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
+            
             if (!err) {
-                console.log(values);
+                ajax('http://127.0.0.1:8000/api/setting','post',{type:"change_info",userName: values.signName,userEmail:values.signEmail,userPhone:values.signPhone},(response) => {
+                    __state.SetState('globalState',response.data);
+                    message.success("修改成功");
+                });
             }
         })
     }
@@ -172,24 +191,7 @@ class UserFormInit extends Component {
         this.setState({ result });
     }
 
-    checkName = () => {
-        clearTimeout(this.onFindTimer);
-        this.onFindTimer = setTimeout(() => {
-            let signName = this.props.form.getFieldValue('signName');
-            let response = ajax('/api/check_name','get', signName);
-            if (response.status !== 0) {
-                this.props.form.setFields({
-                    'signName': {
-                      value: signName,
-                      errors: [new Error('已经存在这个昵称啦')],
-                    },
-                  });
-            }
-        },400)
-    }
-
-   
-
+    
     showModal = () => {
         this.setState({
             visible: true,
@@ -201,12 +203,13 @@ class UserFormInit extends Component {
         });
     }
 
+
     componentDidMount() {
         // 获取用户初始值
         this.props.form.setFieldsValue({
-            signEmail: '757945738@qq.com',
-            signName: 'lalalalala',
-            signPhone: 17691151557
+            signEmail: __state.globalState.userEmail,
+            signName: __state.globalState.userName,
+            signPhone: __state.globalState.userPhone
         });
     }
 
@@ -233,9 +236,9 @@ class UserFormInit extends Component {
                         </FormItem>
                         <FormItem label="用户昵称">
                             {getFieldDecorator('signName', {
-                                rules: [{required: true, message: '请输入你的名字', type:'string', max:30, min:4}],
+                                rules: [{required: true, message: '请输入你的名字', type:'string', max:30, min:6}],
                             })(
-                                <Input onChange={this.checkName} prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="用户名" />
+                                <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="用户名" />
                             )}
                         </FormItem>
                         <FormItem label="联系号码">
@@ -268,42 +271,43 @@ class UserFormInit extends Component {
 }
 const UserForm = Form.create()(UserFormInit);
 
+@observer
 class defaultExport extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            UserPicLoading: false,
-            loading: false,
+            loading: false
         }
     }
-    getBase64(img, callback) {
-        const reader = new FileReader();
-        reader.addEventListener('load', () => callback(reader.result));
-        reader.readAsDataURL(img);
-    }
+    // getBase64(img, callback) {
+    //     const reader = new FileReader();
+    //     reader.addEventListener('load', () => callback(reader.result));
+    //     reader.readAsDataURL(img);
+    // }
       
     beforeUpload(file) {
-        const isJPG = file.type === 'image/jpeg';
+        const isJPG = file.type === 'image/jpeg' || 'image/jpg' || 'image/gif' || 'image/png';
         if (!isJPG) {
-          message.error('You can only upload JPG file!');
+          message.error('只能提交jpeg、jeg、gif、png格式的哦!');
         }
-        const isLt2M = file.size / 1024 / 1024 < 2;
+        const isLt2M = file.size / 1024 / 1024 < 10;
         if (!isLt2M) {
-          message.error('Image must smaller than 2MB!');
+          message.error('Image must smaller than 10MB!');
         }
         return isJPG && isLt2M;
     }
     handleChange = (info) => {
         if (info.file.status === 'uploading') {
-          this.setState({ loading: true });
-          return;
+            this.setState({ loading: true });
+            return;
         }
         if (info.file.status === 'done') {
-          // Get this url from response in real world.
-          this.getBase64(info.file.originFileObj, imageUrl => this.setState({
-            imageUrl,
+          //
+          this.setState({
             loading: false,
-          }));
+          },() => {
+            __state.SetState('globalState',{userPic:info.file.response.data.userPic});
+          });
         }
       }
     render() {
@@ -313,7 +317,7 @@ class defaultExport extends Component {
               <div className="ant-upload-text">Upload</div>
             </div>
           );
-          const imageUrl = this.state.imageUrl;
+          const imageUrl = __state.globalState.userPic;
         return (
             <div>
                 <h2 style={{borderBottom: "1px #e1e4e8 solid"}}>个人设置</h2>
@@ -323,17 +327,17 @@ class defaultExport extends Component {
                     </Col>
                     <Col span={8}>
                         <Dragger
-                        
-                     
                         name="avatar"
                         listType="picture-card"
                         className="avatar-uploader"
                         showUploadList={false}
-                        action="//jsonplaceholder.typicode.com/posts/"
+                        action="http://127.0.0.1:8000/api/setting"
+                        data={{type:"change_img"}}
+                        withCredentials={true}
                         beforeUpload={this.beforeUpload}
                         onChange={this.handleChange}
                         >
-                            {imageUrl ? <img src={imageUrl} alt="" /> : uploadButton}
+                            {imageUrl ? <img style={{width: "100%"}} src={imageUrl} alt="" /> : uploadButton}
                         </Dragger>
                     </Col>
                 </Row>

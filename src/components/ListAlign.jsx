@@ -11,21 +11,27 @@ class defaultExport extends Component {
             contentData: [
                 {
                   title: 'Title 1',
+                  content: '我是内容'
                 },
                 {
                   title: 'Title 2',
+                  content: '我是内容'
                 },
                 {
                   title: 'Title 3',
+                  content: '我是内容'
                 },
                 {
                   title: 'Title 4',
+                  content: '我是内容'
                 },
                 {
                   title: 'Title 5',
+                  content: '我是内容'
                 },
                 {
                   title: 'Title 6',
+                  content: '我是内容'
                 },
             ]
         };
@@ -34,7 +40,6 @@ class defaultExport extends Component {
 
         // 全局变量定义
 
-        
     }
     componentWillReceiveProps(nextProps) {
         if (nextProps.match.params.type !== this.props.match.params.type)
@@ -45,9 +50,6 @@ class defaultExport extends Component {
         }
     }
     componentDidMount() {
-        // if (nextProps.match.params.type !== this.props.match.params.type) {
-        //     console.log(nextProps)
-        // }
         this.setState({
             pageType: this.props.match.params.type
         });
@@ -55,12 +57,13 @@ class defaultExport extends Component {
     render() {
         return (
             <div>
+                <h2>{this.state.pageType === 'star'?"收藏夹":"草稿箱"}</h2>
                 <List
                 grid={{ gutter: 16, xs: 1, sm: 2, md: 4, lg: 4, xl: 6, xxl: 3 }}
                 dataSource={this.state.contentData}
                 renderItem={item => (
                   <List.Item>
-                    <Card actions={[<Icon type="enter" />, <Icon type="ellipsis" />]} hoverable={true} title={item.title}>Card content</Card>
+                    <Card actions={[<Icon type="enter" />, <Icon type="ellipsis" />]} hoverable={true} title={item.title}>{item.content}</Card>
                   </List.Item>
                 )}
               />
