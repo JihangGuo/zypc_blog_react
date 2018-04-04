@@ -9,7 +9,7 @@ class defaultExport extends Component {
         super(props);
         // 设置组件数据state
         this.state = {
-            tags: ['Unre', 'Tag 2', 'Tag 3'],
+            tags: [],
             inputVisible: false,
             inputValue: '',
         };
@@ -24,8 +24,14 @@ class defaultExport extends Component {
     }
     handleClose = (removedTag) => {
         const tags = this.state.tags.filter(tag => tag !== removedTag);
-        console.log(tags);
-        this.setState({ tags });
+        ajax('http://127.0.0.1:8000/api/set_tags','post',{getType:1,tag:removedTag}, (response) => {
+            if (response.status === 1) {
+                message.success("删除成功");
+                this.setState({ tags });
+            } else {
+                message.error("删除出错");
+            }
+        })
     }
     behindClose = (e, removedTag) => {
             e.preventDefault();
@@ -57,8 +63,16 @@ class defaultExport extends Component {
         let tags = state.tags;
         if (inputValue && tags.indexOf(inputValue) === -1) {
             tags = [...tags, inputValue];
+            // 增加标签
+            ajax('http://127.0.0.1:8000/api/set_tags','post',{getType:2,theTag:inputValue}, (response) => {    
+                if (response.status === 1){
+                    message.success('添加成功');
+                } else {
+                    message.error('网络错误');
+                }
+            });
         } else if (tags.indexOf(inputValue) !== -1) {
-            message.warning('已经有相同的标签啦')
+            message.warning("已有相同标签");
         }
         this.setState({
             tags,
@@ -70,9 +84,14 @@ class defaultExport extends Component {
     
     saveInputRef = input => this.input = input
     componentDidMount(){
-        // ajax('http://127.0.0.1:8000/api/get_alll','post','',(response) => {
-        //     console.log(response);
-        // })
+        ajax('http://127.0.0.1:8000/api/set_tags','post',{getType:0},(response) => {
+            if (response.status !== 1) {
+                message.error(response.msg);   
+            }
+            this.setState({
+                tags: response.data
+            });
+        })
     }
     renderTags = (tags) => {
         return tags.map((tag, index) => {
